@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>С возвращением домой!</title>
+<style>
+  :root{
+    --pink:#ff7eb6; --peach:#ffb48a; --lilac:#b79cff; --mint:#8fe3c8; --sun:#ffd86b;
+    --ink:#4a3560; --red:#ff4f7b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Comic Sans MS","Segoe UI",system-ui,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,#ffe3ec 0%,#ffe9d6 50%,#e6dcff 100%);
+    overflow-x:hidden;overflow-y:auto;
+    display:flex;
+  }
+  .scene{position:relative;z-index:2;width:min(92vw,460px);text-align:center;margin:auto;padding:16px 0}
+
+  /* всплывающие сердечки */
+  .heart{
+    position:fixed;bottom:-60px;cursor:pointer;z-index:0;user-select:none;
+    animation:rise linear infinite;opacity:.9;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) translateX(0) rotate(-6deg)}
+    50%{transform:translateY(-60vh) translateX(25px) rotate(6deg)}
+    100%{transform:translateY(-130vh) translateX(-15px) rotate(-6deg)}
+  }
+
+  /* конверт */
+  .envelope{
+    cursor:pointer;margin:0 auto;width:260px;height:170px;position:relative;
+    transition:transform .4s;animation:bob 2.4s ease-in-out infinite;
+  }
+  .envelope:hover{transform:scale(1.05)}
+  @keyframes bob{50%{transform:translateY(-10px)}}
+  .env-body{position:absolute;inset:0;background:var(--peach);border-radius:14px;box-shadow:0 12px 30px rgba(120,60,120,.25)}
+  .env-flap{position:absolute;left:0;right:0;top:0;height:100px;background:#ff9d72;
+    clip-path:polygon(0 0,100% 0,50% 100%);border-radius:14px 14px 0 0;transform-origin:top;transition:transform .6s}
+  .env-heart{position:absolute;left:50%;top:58px;transform:translateX(-50%);font-size:36px;z-index:3;transition:opacity .3s}
+  .hint{margin-top:22px;font-size:18px;opacity:.8;animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  .opened .env-flap{transform:rotateX(180deg)}
+  .opened .env-heart{opacity:0}
+
+  /* открытка */
+  .card{
+    display:none;background:#fff;border-radius:28px;padding:26px 20px 28px;
+    box-shadow:0 20px 50px rgba(150,60,110,.28);
+    animation:pop .7s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .card.show{display:block}
+  @keyframes pop{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+  h1{font-size:clamp(26px,7vw,34px);line-height:1.15;
+    background:linear-gradient(90deg,var(--red),var(--pink),var(--peach));
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .name{font-size:clamp(20px,5.5vw,26px);font-weight:bold;margin-bottom:12px}
+
+  /* пиксельная сцена */
+  #px{
+    width:100%;height:auto;display:block;border-radius:14px;
+    image-rendering:pixelated;image-rendering:crisp-edges;
+    border:4px solid var(--ink);cursor:pointer;touch-action:manipulation;
+  }
+  .msg{min-height:2.6em;margin-top:12px;font-size:17px;font-weight:bold;color:var(--red)}
+  .msg.pop{animation:msgpop .5s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes msgpop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+
+  /* дни ожидания */
+  .days-title{margin-top:6px;font-size:15px;opacity:.75}
+  .days{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+  .day{
+    margin:0;padding:8px 10px;font-size:14px;border-radius:10px;min-width:44px;
+    background:#fff3d6;color:var(--ink);box-shadow:0 3px 0 #e8cf93;border:2px solid var(--ink);
+  }
+  .day.done{background:#e3e3e3;color:#888;text-decoration:line-through;box-shadow:none;transform:translateY(3px)}
+  .day.done::after{content:" ✕";color:var(--red);text-decoration:none;display:inline-block}
+
+  .wish{font-size:16px;line-height:1.5;white-space:pre-line;margin:16px 0 6px}
+
+  button{
+    margin-top:16px;border:0;border-radius:999px;padding:12px 26px;font:inherit;font-size:17px;
+    color:#fff;background:linear-gradient(90deg,var(--pink),var(--lilac));cursor:pointer;
+    box-shadow:0 8px 20px rgba(183,156,255,.5);transition:transform .15s
+  }
+  button:active{transform:scale(.94)}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+  .actions button{margin-top:0;padding:10px 16px;font-size:15px}
+  button.alt{background:linear-gradient(90deg,var(--mint),#7ec8ff);box-shadow:0 6px 16px rgba(126,200,255,.5)}
+  .day{box-shadow:0 3px 0 #e8cf93}
+  .small{margin-top:12px;font-size:14px;opacity:.65}
+
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:5;width:100%;height:100%}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="env-body"></div>
+      <div class="env-flap"></div>
+      <div class="env-heart">💌</div>
+    </div>
+    <p class="hint">Тебе пришло письмо! Нажми, чтобы открыть ✨</p>
+  </div>
+
+  <div class="card" id="card">
+    <h1>С возвращением домой!</h1>
+    <div class="name" id="name"></div>
+
+    <canvas id="px"></canvas>
+    <p class="msg" id="msg">Мы с Чеддером ждём тебя у двери 🐾</p>
+
+    <p class="days-title">Вычёркивай дни, которые мы тебя ждали:</p>
+    <div class="days" id="days"></div>
+
+    <p class="wish" id="wish"></p>
+
+    <div class="actions">
+      <button id="pet" class="alt">🐾 Погладить Чеддера</button>
+      <button id="hug" class="alt">🤗 Обнять</button>
+      <button id="surprise" class="alt">🎁 Сюрприз</button>
+    </div>
+    <p class="small">Кликай на нас на картинке и лопай сердечки 💖</p>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ===== НАСТРОЙКИ — меняй здесь ===== */
+const CONFIG = {
+  name: "Любимая",   // имя можно задать и в ссылке: ?name=Оля
+  waitDays: 7,
+  wish: "Целая неделя без тебя — и дом стал таким тихим. Мы с Чеддером ждали каждый день: он вскакивал при любом шорохе у двери, а я считал часы.\n\nТеперь ты дома, и всё снова на своих местах. Мы очень тебя любим! 💖",
+  sign: "Навсегда твои — я и Чеддер 🐾",
+  dogLines: ["Гав! Это значит «наконец-то»! 🐶", "Гав-гав! Хвост сам виляет, честно 🐕", "Чеддер просит почесать за ушком 🥹", "Гав! Где мои обнимашки? 🐾"],
+  manLines: ["Я так скучал по тебе! 💙", "Дом без тебя — просто стены 🏠", "Ты — лучшее, что со мной случилось ❤️"],
+  surprises: [
+    "Чеддер выучил новый трюк: ждать тебя у двери 🚪",
+    "Ужин, объятия и тёплый плед — всё уже ждёт тебя 🍽️",
+    "Чеддер охранял твою подушку всю неделю 🛏️",
+    "С тобой дом становится домом 💖"
+  ],
+  finale: "Ты дома! Ура-а-а! ❤️🐶"
+};
+/* ==================================== */
+
+const params = new URLSearchParams(location.search);
+if (params.get("name")) CONFIG.name = params.get("name");
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* ---------- конфетти ---------- */
+const colors = ["#ff7eb6","#b79cff","#8fe3c8","#ffd86b","#ffb48a","#7ec8ff","#ff4f7b"];
+const confetti = document.getElementById("confetti");
+const cx = confetti.getContext("2d");
+let W, H, pieces = [], raf = 0;
+function resize(){ W = confetti.width = innerWidth; H = confetti.height = innerHeight; }
+addEventListener("resize", resize); resize();
+function burst(x, y, count = 120) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, s = 4 + Math.random() * 9;
+    pieces.push({
+      x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+      r: Math.random() * 6, vr: (Math.random() - .5) * .4,
+      c: colors[Math.floor(Math.random() * colors.length)], life: 140 + Math.random() * 60
+    });
+  }
+  if (!raf) loop();
+}
+function loop() {
+  cx.clearRect(0, 0, W, H);
+  pieces = pieces.filter(p => p.life > 0 && p.y < H + 30);
+  for (const p of pieces) {
+    p.vy += 0.25; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
+    cx.fillStyle = p.c; cx.globalAlpha = Math.min(1, p.life / 40);
+    cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cx.restore();
+  }
+  raf = pieces.length ? requestAnimationFrame(loop) : 0;
+}
+
+/* ---------- сердечки на фоне ---------- */
+const hearts = ["💖","💗","💕","❤️","💝"];
+function spawnHeart(first) {
+  const h = document.createElement("div");
+  h.className = "heart";
+  h.textContent = pick(hearts);
+  h.style.left = Math.random() * 100 + "vw";
+  h.style.fontSize = 22 + Math.random() * 26 + "px";
+  h.style.animationDuration = 9 + Math.random() * 9 + "s";
+  if (first) h.style.animationDelay = -Math.random() * 12 + "s";
+  document.body.appendChild(h);
+  h.addEventListener("pointerdown", e => {
+    e.stopPropagation();
+    const r = h.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 30);
+    h.remove();
+    setTimeout(() => spawnHeart(false), 2500);
+  });
+}
+for (let i = 0; i < 14; i++) spawnHeart(true);
+
+/* дождь из эмодзи */
+const rainSet = ["🐾","💖","🏠","🦴","✨","🎉","🐶"];
+function emojiRain(n = 30) {
+  for (let i = 0; i < n; i++) {
+    const e = document.createElement("div");
+    e.textContent = pick(rainSet);
+    e.style.cssText = `position:fixed;top:-40px;left:${Math.random()*100}vw;font-size:${20+Math.random()*22}px;z-index:4;pointer-events:none;`;
+    document.body.appendChild(e);
+    e.animate([
+      { transform: "translateY(0) rotate(0)", opacity: 1 },
+      { transform: `translateY(${innerHeight + 80}px) rotate(${Math.random()*360}deg)`, opacity: .9 }
+    ], { duration: 2500 + Math.random() * 2500, delay: Math.random() * 1200, easing: "ease-in" }).onfinish = () => e.remove();
+  }
+}
+
+/* ---------- звук: гав ---------- */
+let audio;
+function bark() {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audio.currentTime;
+    [0, 0.17].forEach(off => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = "square";
+      o.frequency.setValueAtTime(420, t0 + off);
+      o.frequency.exponentialRampToValueAtTime(190, t0 + off + 0.12);
+      g.gain.setValueAtTime(0.0001, t0 + off);
+      g.gain.exponentialRampToValueAtTime(0.18, t0 + off + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + off + 0.13);
+      o.connect(g); g.connect(audio.destination);
+      o.start(t0 + off); o.stop(t0 + off + 0.14);
+    });
+  } catch (e) {}
+}
+
+/* ---------- сообщение ---------- */
+const msg = document.getElementById("msg");
+function say(t) {
+  msg.textContent = t;
+  msg.classList.remove("pop"); void msg.offsetWidth; msg.classList.add("pop");
+}
+
+/* ---------- ПИКСЕЛЬ-АРТ ---------- */
+const PW = 96, PH = 64;
+const cv = document.getElementById("px");
+const c = cv.getContext("2d");
+cv.width = PW; cv.height = PH;
+const OUTLINE = "#3b2a4a";
+
+/* Чеддер — джек-рассел (14×16) */
+const DOG = [
+  ".BB........BB.",
+  "BBBB......BBBB",
+  "BBBWWWWWWWWBBB",
+  "BBWWWWWWWWWWBB",
+  ".WWKWWWWWWKWW.",
+  ".WWWWWKKWWWWW.",
+  "..WWWWWWWWWW..",
+  "...WWWPPWWW...",
+  "....WWPPWW....",
+  "...WWWWWWWW...",
+  "..WWWWWWWWWW..",
+  "..WWBBBBWWWW..",
+  "..WWBBBBWWWW..",
+  "..WWWWWWWWWW..",
+  "..WWWWWWWWWW..",
+  "..WWW..WW.WWW."
+];
+const DOG_PAL = { W:"#ffffff", B:"#b5651d", K:"#222222", P:"#ff7a9a" };
+
+/* Я (12×19) */
+const MAN = [
+  "...HHHHHH...",
+  "..HHHHHHHH..",
+  "..HSSSSSSH..",
+  "..SSKSSKSS..",
+  "..SSSSSSSS..",
+  "..SSSMMSSS..",
+  "...SSSSSS...",
+  "....SSSS....",
+  ".TTTTTTTTTT.",
+  "TTTTTTTTTTTT",
+  "TTTTTTTTTTTT",
+  "STTTTTTTTTTS",
+  "SS.TTTTTT.SS",
+  "..JJJJJJJJ..",
+  "..JJJJJJJJ..",
+  "..JJJ..JJJ..",
+  "..JJJ..JJJ..",
+  "..JJJ..JJJ..",
+  ".XXXX..XXXX."
+];
+const MAN_PAL = { H:"#5a3a22", S:"#f3c9a0", K:"#222222", M:"#c0392b", T:"#4a7bd0", J:"#3a4a7a", X:"#2b2b2b" };
+
+const HEART = [
+  ".RR.RR.",
+  "RRRRRRR",
+  "RRRRRRR",
+  ".RRRRR.",
+  "..RRR..",
+  "...R..."
+];
+const HEART_PAL = { R:"#ff3b6b" };
+
+function sprite(map, pal, x, y) {
+  x = Math.round(x); y = Math.round(y);
+  c.fillStyle = OUTLINE;
+  for (let j = 0; j < map.length; j++) for (let i = 0; i < map[j].length; i++) {
+    if (map[j][i] === ".") continue;
+    c.fillRect(x+i-1, y+j, 1, 1); c.fillRect(x+i+1, y+j, 1, 1);
+    c.fillRect(x+i, y+j-1, 1, 1); c.fillRect(x+i, y+j+1, 1, 1);
+  }
+  for (let j = 0; j < map.length; j++) for (let i = 0; i < map[j].length; i++) {
+    const ch = map[j][i]; if (ch === ".") continue;
+    c.fillStyle = pal[ch]; c.fillRect(x+i, y+j, 1, 1);
+  }
+}
+function rect(x, y, w, h, col) { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); }
+
+const state = { doorOpen: false, finale: false, dogJumpAt: -9999, manJumpAt: -9999, heartAt: 0 };
+const jumpOffset = (now, at, dur, h) => {
+  const p = (now - at) / dur;
+  return p >= 0 && p <= 1 ? -Math.abs(Math.sin(Math.PI * p)) * h : 0;
+};
+
+function drawScene(now) {
+  /* небо */
+  rect(0, 0, PW, 20, "#8fd3ff"); rect(0, 20, PW, 16, "#aee3ff"); rect(0, 36, PW, 12, "#cdefff");
+  /* солнце */
+  rect(7, 6, 8, 8, "#ffe36b"); rect(5, 8, 12, 4, "#ffe36b"); rect(9, 4, 4, 12, "#ffe36b");
+  /* облака */
+  const cloud = (x, y) => { rect(x, y+2, 14, 4, "#fff"); rect(x+3, y, 8, 3, "#fff"); };
+  cloud(((now / 300) % 130) - 20, 8);
+  cloud(((now / 450 + 60) % 130) - 20, 20);
+  /* земля */
+  rect(0, 48, PW, 16, "#6cc36a");
+  rect(0, 52, PW, 1, "#5bb25a"); rect(0, 57, PW, 1, "#5bb25a"); rect(0, 61, PW, 1, "#5bb25a");
+  [[3,55],[22,59],[50,54],[60,60],[90,56]].forEach(([fx, fy]) => { rect(fx, fy, 1, 1, "#fff"); rect(fx, fy-1, 1, 1, "#ffd86b"); });
+  /* дом */
+  rect(62, 23, 34, 25, "#f6e3c5");
+  for (let i = 0; i < 12; i++) {
+    const hw = Math.round(i * 1.6);
+    const x0 = Math.max(62, 79 - hw), x1 = Math.min(96, 79 + hw);
+    rect(x0, 11 + i, x1 - x0, 1, i % 4 === 3 ? "#c0392b" : "#e05a47");
+  }
+  rect(64, 28, 7, 7, "#8fd3ff"); rect(64, 31, 7, 1, "#fff"); rect(67, 28, 1, 7, "#fff");
+  rect(75, 30, 13, 18, "#7a4a22");
+  if (state.doorOpen) {
+    rect(76, 31, 11, 17, "#2b1d3a");
+    rect(76, 31, 2, 17, "#a0612b");
+  } else {
+    rect(76, 31, 11, 17, "#a0612b"); rect(79, 34, 5, 5, "#8a5222"); rect(84, 40, 1, 1, "#ffd86b");
+  }
+  /* сердце на финале */
+  if (state.finale) {
+    const p = Math.min(1, (now - state.heartAt) / 2000);
+    const hx = 79 - p * 36, hy = 38 - p * 24 + Math.sin(now / 300) * 1.2 * p;
+    sprite(HEART, HEART_PAL, hx, hy);
+  }
+  /* я и Чеддер */
+  const manY = 29 + Math.round(Math.sin(now / 500) * 0.6) + Math.round(jumpOffset(now, state.manJumpAt, 500, 6));
+  const dogY = 32 + Math.round(jumpOffset(now, state.dogJumpAt, 520, 9));
+  sprite(MAN, MAN_PAL, 8, manY);
+  sprite(DOG, DOG_PAL, 30, dogY);
+  /* виляющий «хвост» — пиксель сбоку */
+  const wag = Math.round(Math.sin(now / 90) * 1.5);
+  rect(45, dogY + 12 + wag, 2, 2, "#ffffff");
+  /* «ждём» — точки над головой до финала */
+  if (!state.finale) {
+    const n = 1 + Math.floor(now / 500) % 3;
+    for (let k = 0; k < n; k++) rect(14 + k * 3, 24, 1, 1, "#3b2a4a");
+  }
+}
+(function frame(now){ drawScene(now || 0); requestAnimationFrame(frame); })();
+
+/* кликабельные зоны на сцене */
+const dogJump = () => { state.dogJumpAt = performance.now(); };
+const manJump = () => { state.manJumpAt = performance.now(); };
+cv.addEventListener("pointerdown", e => {
+  e.stopPropagation();
+  const r = cv.getBoundingClientRect();
+  const lx = (e.clientX - r.left) / r.width * PW, ly = (e.clientY - r.top) / r.height * PH;
+  if (lx >= 27 && lx <= 47 && ly >= 26 && ly <= 49) petDog(e.clientX, e.clientY);
+  else if (lx >= 5 && lx <= 23 && ly >= 25 && ly <= 49) hugMe(e.clientX, e.clientY);
+  else burst(e.clientX, e.clientY, 30);
+});
+function petDog(x, y) {
+  dogJump(); bark(); say(pick(CONFIG.dogLines));
+  burst(x || innerWidth / 2, y || innerHeight / 2, 40);
+}
+function hugMe(x, y) {
+  manJump(); dogJump(); say(pick(CONFIG.manLines));
+  burst(x || innerWidth / 2, y || innerHeight / 2, 60);
+}
+
+/* ---------- дни ожидания ---------- */
+const daysBox = document.getElementById("days");
+let doneCount = 0;
+for (let i = 1; i <= CONFIG.waitDays; i++) {
+  const b = document.createElement("button");
+  b.className = "day"; b.type = "button"; b.textContent = "День " + i;
+  b.addEventListener("click", e => {
+    if (b.classList.contains("done")) return;
+    b.classList.add("done"); doneCount++;
+    dogJump();
+    const left = CONFIG.waitDays - doneCount;
+    if (left > 0) {
+      say(left === 1 ? "Остался всего один день! 🥹" : "Осталось ждать: " + left + " дн. ⏳");
+      const r = b.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top, 25);
+    } else finaleScene();
+  });
+  daysBox.appendChild(b);
+}
+function finaleScene() {
+  state.finale = true; state.doorOpen = true; state.heartAt = performance.now();
+  say(CONFIG.finale);
+  bark(); dogJump(); manJump();
+  burst(innerWidth * .3, innerHeight * .35, 130);
+  burst(innerWidth * .7, innerHeight * .35, 130);
+  emojiRain(45);
+  let k = 0;
+  const t = setInterval(() => { dogJump(); if (k % 2) manJump(); bark(); if (++k > 3) clearInterval(t); }, 700);
+}
+
+/* ---------- печатающийся текст ---------- */
+function typeText(el, text, speed = 20) {
+  el.textContent = ""; let i = 0;
+  const t = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) clearInterval(t);
+  }, speed);
+}
+
+/* ---------- открытие конверта ---------- */
+const envelope = document.getElementById("envelope");
+envelope.addEventListener("click", () => {
+  envelope.classList.add("opened");
+  envelope.parentElement.classList.add("opened");
+  burst(innerWidth / 2, innerHeight / 2.5);
+  setTimeout(() => {
+    document.getElementById("envelopeWrap").style.display = "none";
+    document.getElementById("card").classList.add("show");
+    document.getElementById("name").textContent = "💖 " + CONFIG.name + " 💖";
+    typeText(document.getElementById("wish"), CONFIG.wish + "\n\n" + CONFIG.sign);
+    burst(innerWidth / 2, innerHeight / 3, 160);
+    emojiRain();
+    setTimeout(dogJump, 600);
+  }, 700);
+});
+
+/* ---------- кнопки ---------- */
+document.getElementById("pet").addEventListener("click", e => {
+  const r = e.target.getBoundingClientRect(); petDog(r.left + r.width / 2, r.top);
+});
+document.getElementById("hug").addEventListener("click", e => {
+  const r = e.target.getBoundingClientRect(); hugMe(r.left + r.width / 2, r.top); emojiRain(18);
+});
+document.getElementById("surprise").addEventListener("click", e => {
+  say(pick(CONFIG.surprises));
+  const r = e.target.getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 70);
+});
+
+/* клик по экрану — маленький салют */
+addEventListener("pointerdown", e => {
+  if (e.target.closest("button") || e.target.closest("#envelope") || e.target.closest(".heart") || e.target.closest("#px")) return;
+  burst(e.clientX, e.clientY, 40);
+});
+</script>
+</body>
+</html>
