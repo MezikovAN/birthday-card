@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>С днём рождения!</title>
+<style>
+  :root{
+    --pink:#ff7eb6; --peach:#ffb48a; --lilac:#b79cff; --mint:#8fe3c8; --sun:#ffd86b;
+    --ink:#4a3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Comic Sans MS","Segoe UI",system-ui,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,#ffe3f1 0%,#e6dcff 50%,#d6f5ff 100%);
+    overflow-x:hidden;overflow-y:auto;
+    display:flex;
+  }
+  .scene{margin:auto;padding:16px 0}
+  /* плавающие шарики */
+  .balloon{
+    position:fixed;bottom:-140px;width:56px;height:70px;border-radius:50% 50% 48% 48%;
+    animation:rise linear infinite;opacity:.9;z-index:0;
+  }
+  .balloon::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:60px;background:rgba(74,53,96,.35)}
+  .balloon::before{content:"";position:absolute;left:18%;top:15%;width:14px;height:20px;border-radius:50%;background:rgba(255,255,255,.55);transform:rotate(30deg)}
+  @keyframes rise{
+    0%{transform:translateY(0) translateX(0) rotate(-4deg)}
+    50%{transform:translateY(-60vh) translateX(25px) rotate(4deg)}
+    100%{transform:translateY(-130vh) translateX(-15px) rotate(-4deg)}
+  }
+
+  .scene{position:relative;z-index:2;width:min(92vw,460px);text-align:center}
+
+  /* конверт */
+  .envelope{
+    cursor:pointer;margin:0 auto;width:260px;height:170px;position:relative;
+    transition:transform .4s;animation:bob 2.4s ease-in-out infinite;
+  }
+  .envelope:hover{transform:scale(1.05)}
+  @keyframes bob{50%{transform:translateY(-10px)}}
+  .env-body{position:absolute;inset:0;background:var(--peach);border-radius:14px;box-shadow:0 12px 30px rgba(120,60,120,.25)}
+  .env-flap{position:absolute;left:0;right:0;top:0;height:100px;background:#ff9d72;
+    clip-path:polygon(0 0,100% 0,50% 100%);border-radius:14px 14px 0 0;transform-origin:top;transition:transform .6s}
+  .env-heart{position:absolute;left:50%;top:58px;transform:translateX(-50%);font-size:36px;z-index:3;transition:opacity .3s}
+  .hint{margin-top:22px;font-size:18px;opacity:.8;animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  .opened .env-flap{transform:rotateX(180deg)}
+  .opened .env-heart{opacity:0}
+
+  /* открытка */
+  .card{
+    display:none;background:#fff;border-radius:28px;padding:28px 22px 30px;
+    box-shadow:0 20px 50px rgba(120,60,150,.28);
+    animation:pop .7s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .card.show{display:block}
+  @keyframes pop{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+  h1{font-size:clamp(26px,7vw,36px);line-height:1.15;
+    background:linear-gradient(90deg,var(--pink),var(--lilac),var(--peach));
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .name{font-size:clamp(22px,6vw,30px);font-weight:bold;margin-bottom:10px}
+  .wish{font-size:16px;line-height:1.5;white-space:pre-line;margin:10px 0 6px}
+
+  /* торт */
+  .cake{position:relative;width:200px;height:150px;margin:6px auto 0}
+  .layer{position:absolute;left:50%;transform:translateX(-50%);border-radius:12px}
+  .l1{bottom:0;width:190px;height:50px;background:var(--pink)}
+  .l2{bottom:50px;width:150px;height:42px;background:var(--lilac)}
+  .l3{bottom:92px;width:110px;height:34px;background:var(--mint)}
+  .drip{position:absolute;left:0;right:0;top:0;height:14px;background:#fff;border-radius:0 0 40% 40%/0 0 100% 100%;opacity:.9}
+  .candle{position:absolute;bottom:126px;width:8px;height:24px;border-radius:3px;background:repeating-linear-gradient(45deg,#fff 0 4px,var(--pink) 4px 8px)}
+  .flame{position:absolute;left:50%;bottom:100%;width:12px;height:18px;margin-left:-6px;
+    background:radial-gradient(circle at 50% 70%,#fff6a8,#ffb03b 70%,transparent 72%);
+    border-radius:50% 50% 50% 50%/60% 60% 40% 40%;transform-origin:bottom;
+    animation:flick .25s infinite alternate;transition:opacity .4s,transform .4s;filter:drop-shadow(0 0 6px #ffcf5a)}
+  @keyframes flick{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.9,1.12) rotate(3deg)}}
+  .out .flame{opacity:0;transform:scale(0)}
+  .smoke{position:absolute;left:50%;bottom:100%;font-size:14px;opacity:0}
+  .out .smoke{animation:smoke 1.4s ease-out forwards}
+  @keyframes smoke{from{opacity:.8;transform:translateY(0)}to{opacity:0;transform:translateY(-40px)}}
+
+  button{
+    margin-top:16px;border:0;border-radius:999px;padding:12px 26px;font:inherit;font-size:17px;
+    color:#fff;background:linear-gradient(90deg,var(--pink),var(--lilac));cursor:pointer;
+    box-shadow:0 8px 20px rgba(183,156,255,.5);transition:transform .15s
+  }
+  button:active{transform:scale(.94)}
+  .small{margin-top:10px;font-size:14px;opacity:.65}
+
+  .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+  .actions button{margin-top:0;padding:10px 16px;font-size:15px}
+  button.alt{background:linear-gradient(90deg,var(--mint),#7ec8ff);box-shadow:0 6px 16px rgba(126,200,255,.5)}
+  .msg{min-height:2.6em;margin-top:14px;font-size:17px;font-weight:bold;color:var(--pink)}
+  .msg.pop{animation:msgpop .5s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes msgpop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+  .balloon{cursor:pointer}
+  canvas{position:fixed;inset:0;pointer-events:none;z-index:5}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="env-body"></div>
+      <div class="env-flap"></div>
+      <div class="env-heart">💌</div>
+    </div>
+    <p class="hint">Тебе пришло письмо! Нажми, чтобы открыть ✨</p>
+  </div>
+
+  <div class="card" id="card">
+    <h1>С Днём Рождения!</h1>
+    <div class="name" id="name">🎉 🎂 🎉</div>
+
+    <div class="cake" id="cake">
+      <div class="layer l1"><div class="drip"></div></div>
+      <div class="layer l2"><div class="drip"></div></div>
+      <div class="layer l3"><div class="drip"></div></div>
+      <div class="candle" style="left:68px"><div class="flame"></div><div class="smoke">💨</div></div>
+      <div class="candle" style="left:96px"><div class="flame"></div><div class="smoke">💨</div></div>
+      <div class="candle" style="left:124px"><div class="flame"></div><div class="smoke">💨</div></div>
+    </div>
+
+    <p class="wish" id="wish"></p>
+
+    <button id="blow">Задуть свечи 🕯️</button>
+    <div class="actions">
+      <button id="gift" class="alt">🎁 Подарок</button>
+      <button id="star" class="alt">⭐ Желание</button>
+      <button id="music" class="alt">🎵 Музыка</button>
+    </div>
+    <p class="msg" id="msg"></p>
+    <p class="small">Лопай шарики на фоне и кликай где угодно 🎈</p>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ===== НАСТРОЙКИ — меняй здесь ===== */
+const CONFIG = {
+  name: "Дорогая Катя!",   // имя можно задать и в ссылке: ?name=Маша
+  wish: "Команда BRIGHT желает тебе ярких идей, лёгких проектов и тепла в каждом дне. Спасибо, что ты с нами. Ты делаешь нашу команду по-настоящему яркой! ✨",
+  sign: "С любовью, команда BRIGHT 💛",
+  compliments: [
+    "Ты умеешь делать мир вокруг теплее ☀️",
+    "С тобой любое дело превращается в праздник 🎉",
+    "У тебя самая светлая улыбка 😊",
+    "Ты вдохновляешь всех вокруг ✨",
+    "Пусть удача всегда будет на твоей стороне 🍀",
+    "Ты — чудо, и это не обсуждается 💖"
+  ],
+  wishes: [
+    "Желание принято! Вселенная уже в курсе 🌌",
+    "Звезда услышала — жди приятный сюрприз ⭐",
+    "Загаданное сбудется, в этом году точно! 🔮",
+    "Мечты любят смелых — а ты именно такая 💫"
+  ],
+  emojiRain: ["🎈","🎁","⭐","💖","🌸","🍰","✨"]
+};
+/* ==================================== */
+
+const params = new URLSearchParams(location.search);
+if (params.get("name")) CONFIG.name = params.get("name");
+
+/* шарики на фоне */
+const colors = ["#ff7eb6","#b79cff","#8fe3c8","#ffd86b","#ffb48a","#7ec8ff"];
+for (let i = 0; i < 14; i++) {
+  const b = document.createElement("div");
+  b.className = "balloon";
+  b.style.left = Math.random() * 100 + "vw";
+  b.style.background = colors[i % colors.length];
+  b.style.animationDuration = 9 + Math.random() * 9 + "s";
+  b.style.animationDelay = -Math.random() * 12 + "s";
+  b.style.transform = "scale(" + (0.7 + Math.random() * 0.7) + ")";
+  document.body.appendChild(b);
+  // лопнуть шарик по клику
+  b.addEventListener("pointerdown", e => {
+    e.stopPropagation();
+    const r = b.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 35);
+    b.remove();
+    const nb = b.cloneNode(false);
+    setTimeout(() => { nb.style.bottom = "-140px"; document.body.appendChild(nb); nb.addEventListener("pointerdown", ev => { ev.stopPropagation(); const rr = nb.getBoundingClientRect(); burst(rr.left+rr.width/2, rr.top+rr.height/2, 35); nb.remove(); }); }, 3000);
+  });
+}
+
+/* конфетти */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+let W, H, pieces = [];
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+addEventListener("resize", resize); resize();
+
+function burst(x, y, count = 120) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, s = 4 + Math.random() * 9;
+    pieces.push({
+      x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+      r: Math.random() * 6, vr: (Math.random() - .5) * .4,
+      c: colors[Math.floor(Math.random() * colors.length)], life: 140 + Math.random() * 60
+    });
+  }
+  if (!raf) loop();
+}
+let raf = 0;
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  pieces = pieces.filter(p => p.life > 0 && p.y < H + 30);
+  for (const p of pieces) {
+    p.vy += 0.25; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+    ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life / 40);
+    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+  }
+  raf = pieces.length ? requestAnimationFrame(loop) : 0;
+}
+
+/* дождь из эмодзи */
+function emojiRain(n = 30) {
+  for (let i = 0; i < n; i++) {
+    const e = document.createElement("div");
+    e.textContent = CONFIG.emojiRain[Math.floor(Math.random() * CONFIG.emojiRain.length)];
+    e.style.cssText = `position:fixed;top:-40px;left:${Math.random()*100}vw;font-size:${20+Math.random()*22}px;z-index:4;pointer-events:none;`;
+    document.body.appendChild(e);
+    const dur = 2500 + Math.random() * 2500;
+    e.animate([
+      { transform: "translateY(0) rotate(0)", opacity: 1 },
+      { transform: `translateY(${innerHeight + 80}px) rotate(${Math.random()*360}deg)`, opacity: .9 }
+    ], { duration: dur, delay: Math.random() * 1200, easing: "ease-in" }).onfinish = () => e.remove();
+  }
+}
+
+/* печатающийся текст */
+function typeText(el, text, speed = 20) {
+  el.textContent = ""; let i = 0;
+  const t = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) clearInterval(t);
+  }, speed);
+}
+
+/* открытие конверта */
+const envelope = document.getElementById("envelope");
+envelope.addEventListener("click", () => {
+  envelope.parentElement.classList.add("opened");
+  envelope.classList.add("opened");
+  envelope.parentElement.classList.add("opened");
+  burst(innerWidth / 2, innerHeight / 2.5);
+  setTimeout(() => {
+    document.getElementById("envelopeWrap").style.display = "none";
+    const card = document.getElementById("card");
+    card.classList.add("show");
+    document.getElementById("name").textContent = "🎉 " + CONFIG.name + " 🎉";
+    typeText(document.getElementById("wish"), CONFIG.wish + "\n\n" + CONFIG.sign);
+    burst(innerWidth / 2, innerHeight / 3, 160);
+    emojiRain();
+  }, 700);
+});
+
+/* задуть свечи */
+const cake = document.getElementById("cake");
+const blow = document.getElementById("blow");
+let out = false;
+blow.addEventListener("click", () => {
+  if (!out) {
+    cake.classList.add("out"); out = true;
+    blow.textContent = "Ура! Ещё салют? 🎆";
+    burst(innerWidth * .25, innerHeight * .4, 100);
+    burst(innerWidth * .75, innerHeight * .4, 100);
+    emojiRain(40);
+  } else {
+    // зажечь снова + новый салют
+    cake.classList.remove("out"); out = false;
+    blow.textContent = "Задуть свечи 🕯️";
+    burst(innerWidth / 2, innerHeight / 2, 140);
+  }
+});
+
+/* сообщение под кнопками */
+const msg = document.getElementById("msg");
+function say(t) {
+  msg.textContent = t;
+  msg.classList.remove("pop"); void msg.offsetWidth; msg.classList.add("pop");
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* подарок — случайный комплимент */
+document.getElementById("gift").addEventListener("click", e => {
+  say(pick(CONFIG.compliments));
+  const r = e.target.getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top, 70);
+});
+
+/* звезда желаний */
+document.getElementById("star").addEventListener("click", () => {
+  const s = document.createElement("div");
+  s.textContent = "🌠";
+  s.style.cssText = "position:fixed;left:-60px;top:10vh;font-size:48px;z-index:6;pointer-events:none;filter:drop-shadow(0 0 12px #ffd86b)";
+  document.body.appendChild(s);
+  s.animate([
+    { transform: "translate(0,0) rotate(0)", opacity: 1 },
+    { transform: `translate(${innerWidth + 120}px,${innerHeight * .35}px) rotate(20deg)`, opacity: .8 }
+  ], { duration: 1500, easing: "ease-in-out" }).onfinish = () => {
+    s.remove();
+    say(pick(CONFIG.wishes));
+    burst(innerWidth * .8, innerHeight * .45, 90);
+  };
+});
+
+/* мелодия «С днём рождения» через Web Audio */
+let audio, playing = false;
+document.getElementById("music").addEventListener("click", () => {
+  if (playing) return;
+  playing = true;
+  audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+  const G4=392,A4=440,B4=494,C5=523,D5=587,E5=659,F5=698,G5=784;
+  const tune = [
+    [G4,.75],[G4,.25],[A4,1],[G4,1],[C5,1],[B4,2],
+    [G4,.75],[G4,.25],[A4,1],[G4,1],[D5,1],[C5,2],
+    [G4,.75],[G4,.25],[G5,1],[E5,1],[C5,1],[B4,1],[A4,1],
+    [F5,.75],[F5,.25],[E5,1],[C5,1],[D5,1],[C5,2]
+  ];
+  const beat = 0.42; let t = audio.currentTime + 0.05;
+  for (const [f, d] of tune) {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = "triangle"; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.25, t + .03);
+    g.gain.exponentialRampToValueAtTime(.001, t + d * beat);
+    o.connect(g); g.connect(audio.destination);
+    o.start(t); o.stop(t + d * beat);
+    t += d * beat;
+  }
+  say("🎶 С днём рождения тебя! 🎶");
+  burst(innerWidth / 2, innerHeight / 2, 120);
+  setTimeout(() => { playing = false; }, (t - audio.currentTime) * 1000);
+});
+
+/* клик по экрану — маленький салют */
+addEventListener("pointerdown", e => {
+  if (e.target.closest("button") || e.target.closest("#envelope") || e.target.closest(".balloon")) return;
+  burst(e.clientX, e.clientY, 40);
+});
+</script>
+</body>
+</html>
