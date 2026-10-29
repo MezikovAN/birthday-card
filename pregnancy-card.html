@@ -147,9 +147,11 @@ function breakfastAction(time){const cycle=((time%10000)+10000)%10000;const kind
 function bowlWiggle(time){const phase=((time%7000)+7000)%7000;return phase<1600?Math.round(Math.sin(phase/1600*Math.PI*4)*2):0;}
 function drawSeatedPerson(x,y,male=false,breakfast=false,time=0){const {c,r,poly}=painter(document.getElementById('scene'));c.save();c.translate(x,y);
 const hair=male?'#5a3a22':'#3b2a4a',skin='#edbea7',top=male?'#4a7bd0':breakfast?'#e6dcff':'#f49bbb',shade=male?'#3561af':breakfast?'#b8a5dc':'#ce709b';
+const kiss=breakfast?0:eveningAction(time).kiss;c.save();c.translate(Math.round(male?-kiss*9:kiss*12),0);if(male&&kiss>.2){c.translate(20,0);c.scale(-1,1);}
 if(!male){poly([[0,0],[14,0],[19,6],[20,31],[17,44],[-4,44],[-5,10]],hair);r(-2,10,3,28,'#66505a');}
 else{r(0,0,16,6,hair);r(-3,4,23,12,hair);r(0,12,17,13,hair);}
 poly([[5,6],[16,6],[18,12],[21,15],[21,18],[18,18],[18,26],[13,30],[6,27],[3,20],[3,12]],skin);r(7,9,8,15,'#f5ceb4');r(16,14,2,2,'#3b2a4a');r(15,22,3,1,'#bf8e86');r(7,27,8,8,skin);r(3,4,14,6,hair);if(!male)r(1,9,5,16,hair);
+c.restore();
 if(male){poly([[1,34],[16,34],[22,42],[24,61],[21,73],[-5,73],[-6,44]],top);r(-4,42,4,27,shade);r(-3,72,28,7,'#3a4a7a');r(14,78,10,13,'#3a4a7a');r(18,89,14,4,'#514957');}
 else{poly([[1,34],[15,34],[21,40],[24,44],[29,46],[32,51],[33,60],[30,67],[25,70],[30,75],[30,81],[-4,81],[-6,75],[-4,43]],top);r(-4,44,4,28,shade);r(24,48,4,7,breakfast?'#f5efff':'#ffd0e0');if(breakfast){r(0,35,17,2,'#fff5f5');r(2,37,12,2,'#fff5f5');r(2,78,27,3,'#fff5f5');for(const [dx,dy]of [[5,47],[15,55],[7,66],[23,69]]){r(dx,dy,2,2,'#fff9f4');}r(7,38,3,3,'#efadc6');}r(5,81,8,9,skin);r(23,81,7,9,skin);r(3,89,13,4,'#514957');r(21,89,14,4,'#514957');}
 if(breakfast){const action=breakfastAction(time);const handX=action.kind==='coffee'?Math.round(30-12*action.lift):Math.round(32-12*action.lift),handY=Math.round(51-32*action.lift);poly([[5,39],[10,39],[12,47],[handX-3,handY],[handX+2,handY],[handX+2,handY+4],[handX-4,handY+5],[9,53],[5,46]],skin);
@@ -177,20 +179,29 @@ poly([[bowlX,bowlY],[bowlX+13,bowlY],[bowlX+11,bowlY+7],[bowlX+3,bowlY+7]],'#cf9
 
 poly([[206,108],[208,108],[209,110],[211,108],[213,108],[213,112],[209,116],[206,113]],'#c08a98');dogCanvas.restore();
 }
+function eveningAction(time){const phase=((time%20000)+20000)%20000;const kiss=phase<11000||phase>=15000?0:phase<12200?(phase-11000)/1200:phase<13800?1:1-(phase-13800)/1200;const dogPhase=((time%15000)+15000)%15000;return {kiss,channel:Math.floor(time/7000)%4,awake:dogPhase>=9500&&dogPhase<13000,lift:dogPhase<9500||dogPhase>=13000?0:dogPhase<10200?(dogPhase-9500)/700:dogPhase<12300?1:1-(dogPhase-12300)/700,look:dogPhase<11200?-1:1};}
 function drawEvening(time){drawRoom(true);const {r,poly}=painter(document.getElementById('scene'));
 // Широкий диван для двоих.
 r(72,85,92,47,'#9674d1');r(78,80,80,9,'#b79cff');r(78,89,36,32,'#cdb5ff');r(117,89,40,32,'#cdb5ff');r(69,109,9,29,'#9270c9');r(158,109,10,29,'#9270c9');r(76,130,85,9,'#7958ad');r(81,139,4,9,'#65596f');r(151,139,4,9,'#65596f');
 drawSeatedPerson(86,48,false,false,time);drawSeatedPerson(128,48,true,false,time);
+const evening=eveningAction(time);if(evening.kiss>.5){poly([[111,68],[114,65],[117,65],[120,68],[123,65],[126,65],[129,68],[129,72],[120,80],[111,72]],'#ff7eb6');}
 // Плед на коленях; живот и рука остаются видны.
 r(119,115,32,8,'#ffb48a');r(124,123,28,10,'#ffb48a');r(140,133,12,6,'#ffb48a');for(let x=124;x<153;x+=6)r(x,117,1,15,'#b78f99');
 // Телевизор справа, экран обращён к паре.
 r(190,76,44,36,'#4e485f');r(193,79,38,29,'#b2bad3');r(196,82,32,23,'#8a9fc4');r(196,97,32,8,'#a6b5af');r(201,90,9,7,'#e1c69f');r(203,87,5,4,'#e1c69f');r(217,84,7,7,'#e3d5b7');r(211,104,3,11,'#51495f');r(201,114,23,3,'#51495f');r(186,119,50,4,'#b39699');r(189,123,3,22,'#977b89');r(230,123,3,22,'#977b89');
+// Четыре канала: природа, аквариум, ночное небо и мультфильм.
+r(196,82,32,23,['#a5d9c8','#80b9df','#555c91','#f4d19f'][evening.channel]);
+if(evening.channel===0){r(196,99,32,6,'#77ad7c');r(204,89,3,14,'#8a6e64');poly([[197,96],[205,84],[214,96]],'#518b73');r(219,85,5,5,'#ffe5a1');}
+if(evening.channel===1){for(let i=0;i<2;i++){const x=200+Math.floor(time/500+i*13)%20,y=89+i*8;r(x,y,5,3,i?'#ffc2aa':'#ffe598');r(x+5,y-1,2,5,i?'#ffc2aa':'#ffe598');}r(199,100,2,5,'#6a9c89');r(221,98,2,7,'#6a9c89');}
+if(evening.channel===2){r(216,85,6,6,'#f8e7b7');r(219,84,4,5,'#555c91');for(const [x,y]of [[201,87],[210,96],[224,100]]){r(x,y,1,3,'#f8e7b7');r(x-1,y+1,3,1,'#f8e7b7');}}
+if(evening.channel===3){r(196,100,32,5,'#c0ca94');r(202,90,7,10,'#c498c7');r(203,87,2,4,'#c498c7');r(207,87,2,4,'#c498c7');r(215,92,8,8,'#e89f8e');r(217,88,4,5,'#e89f8e');}
+r(227,81,3,2,'#f6ead8');
 // Лежанка и свернувшийся спящий белый пёс.
 r(169,154,54,7,'#b28d9f');r(165,150,61,7,'#b28d9f');r(171,148,48,7,'#d1b4bc');r(175,146,41,8,'#e1c9c8');const breath=Math.floor(time/1600)%2;
-const dogCanvas=document.getElementById('scene').getContext('2d');dogCanvas.save();dogCanvas.translate(0,-dogReaction().jump);poly([[181,140-breath],[188,136-breath],[204,136-breath],[212,140-breath],[214,148],[208,152],[181,152],[176,148]],'#a59a9a');r(182,139-breath,24,11, '#fffaf2');r(178,144,31,6,'#fffaf2');r(204,140,6,5,'#ac7856');r(209,143,4,3,'#fffaf2');r(181,144,10,6,'#e4ddd8');r(178,141,12,8,'#fffaf2');r(176,145,3,2,'#554c54');r(182,143,3,1,'#8f8188');poly([[187,141],[192,143],[190,147],[187,146]],'#e4ddd8');
+const dogCanvas=document.getElementById('scene').getContext('2d');dogCanvas.save();dogCanvas.translate(0,-dogReaction().jump);poly([[181,140-breath],[188,136-breath],[204,136-breath],[212,140-breath],[214,148],[208,152],[181,152],[176,148]],'#a59a9a');r(182,139-breath,24,11, '#fffaf2');r(178,144,31,6,'#fffaf2');r(204,140,6,5,'#ac7856');r(209,143,4,3,'#fffaf2');r(181,144,10,6,'#e4ddd8');dogCanvas.save();dogCanvas.translate(evening.awake?evening.look:0,-Math.round(evening.lift*7));r(178,141,12,8,'#fffaf2');r(176,145,3,2,'#554c54');if(evening.awake){r(181,142,1,2,'#554c54');r(184,142,1,2,'#554c54');}else r(182,143,3,1,'#8f8188');poly([[187,141],[192,143],[190,147],[187,146]],'#e4ddd8');dogCanvas.restore();
 dogCanvas.restore();
 // Пиксельные сонные «z» над лежанкой.
-const z=Math.floor(time/1800)%2;r(181,125-z*2,5,1,'#d9c8db');r(184,126-z*2,1,1,'#d9c8db');r(183,127-z*2,1,1,'#d9c8db');r(181,128-z*2,5,1,'#d9c8db');
+if(!evening.awake){const z=Math.floor(time/1800)%2;r(181,125-z*2,5,1,'#d9c8db');r(184,126-z*2,1,1,'#d9c8db');r(183,127-z*2,1,1,'#d9c8db');r(181,128-z*2,5,1,'#d9c8db');}
 // Тёплый торшер.
 r(47,94,2,48,'#d2b39d');r(41,142,14,3,'#c1a18f');poly([[40,80],[56,80],[61,96],[35,96]],'#e7c99d');r(40,96,16,2,'#f5dfb4');
 }
