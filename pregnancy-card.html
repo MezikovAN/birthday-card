@@ -39,6 +39,7 @@ main{width:min(94vw,580px);padding:24px}.scene-tabs{display:flex;justify-content
 .stage button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-appearance:none;appearance:none;box-shadow:none;user-select:none;-webkit-user-select:none}
 .stage button:hover,.stage button:active,.stage button:focus{background:transparent;box-shadow:none;outline:none}
 .stage button:focus-visible{outline:2px dashed #ff9dbf;outline-offset:-3px;border-radius:10px;background:transparent}
+.belly::after{content:none;display:none}
 </style>
 </head>
 <body>
@@ -130,7 +131,7 @@ r(105,81,5,43,dark);r(109,124,4,13,dark);r(115,133,26,3,'#ffd0e0');r(133,88,6,4,
 poly([[109,76],[114,76],[116,81],[115,91],[119,100],[127,103],[137,101],[141,103],[141,107],[128,110],[118,108],[112,103],[107,93],[107,82]],skin);r(109,79,4,12,light);r(128,104,10,2,light);
 r(112,140,7,11,skin);r(133,140,6,11,skin);r(109,150,13,4,hair);r(130,150,14,4,hair);r(109,149,8,2,'#b38d9a');r(130,149,7,2,'#b38d9a');
 // Маленькие домашние детали.
-r(157,75,2,12,'#b99ca3');r(152,80,12,2,'#b99ca3');r(158,100,2,7,'#c7abb1');r(155,103,8,2,'#c7abb1');
+
 if(!dog.behind)drawDog(dog);
 }
 function sceneForHour(hour){return hour>=6&&hour<12?'morning':hour>=12&&hour<18?'day':'evening';}
