@@ -115,12 +115,12 @@ r(175,107,43,34,'#b79cff');r(171,113,7,25,'#9879d2');r(217,113,7,25,'#9879d2');r
 r(25,121,17,19,'#b6877d');r(23,118,21,5,'#cba095');r(32,94,2,24,'#788d74');poly([[33,104],[23,99],[21,94],[29,94],[34,100]],'#9bae8b');poly([[34,111],[43,104],[44,99],[37,101],[33,107]],'#829a7e');poly([[33,98],[28,89],[29,84],[34,89],[35,98]],'#9bae8b');
 // Темноволосая девушка: все координаты на пиксельной сетке.
 if(dog.behind)drawDog(dog);
-const hair='#3b2a4a',shade='#66505a',skin='#edbea7',light='#f6cfb5',dress='#b79cff',dark='#9273d4';
+const hair='#3b2a4a',shade='#66505a',skin='#edbea7',light='#f6cfb5',dress='#f49bbb',dark='#ce709b';
 poly([[104,31],[119,31],[119,34],[124,34],[124,40],[127,40],[127,68],[124,68],[124,85],[101,85],[101,75],[97,75],[97,44],[100,44],[100,35],[104,35]],hair);
 r(104,38,4,30,shade);r(101,45,3,23,shade);poly([[111,39],[122,39],[122,45],[125,45],[125,50],[129,50],[129,54],[125,54],[125,63],[121,63],[121,67],[114,67],[114,59],[109,59],[109,45]],skin);r(114,42,7,16,light);r(121,48,2,2,hair);r(121,55,3,2,'#d99a92');r(114,64,8,9,skin);r(111,39,11,5,hair);r(108,43,6,13,hair);
 // Платье и округлый силуэт живота направо.
 poly([[108,70],[122,70],[125,75],[129,78],[129,82],[136,82],[136,85],[142,85],[142,90],[147,90],[147,99],[149,99],[149,112],[146,112],[146,123],[150,135],[146,140],[104,140],[101,137],[104,115],[103,83]],dress);
-r(105,81,5,43,dark);r(109,124,4,13,dark);r(115,133,26,3,'#d4bfff');r(133,88,6,4,'#d4bfff');r(140,93,4,12,'#d4bfff');
+r(105,81,5,43,dark);r(109,124,4,13,dark);r(115,133,26,3,'#ffd0e0');r(133,88,6,4,'#ffd0e0');r(140,93,4,12,'#ffd0e0');
 // Рука лежит на животе.
 poly([[109,76],[114,76],[116,81],[115,91],[119,100],[127,103],[137,101],[141,103],[141,107],[128,110],[118,108],[112,103],[107,93],[107,82]],skin);r(109,79,4,12,light);r(128,104,10,2,light);
 r(112,140,7,11,skin);r(133,140,6,11,skin);r(109,150,13,4,hair);r(130,150,14,4,hair);r(109,149,8,2,'#b38d9a');r(130,149,7,2,'#b38d9a');
@@ -143,28 +143,38 @@ r(183,47,39,4,evening?'#a78b9a':'#b49888');r(188,34,5,13,'#a5ae94');r(194,32,5,1
 r(19,118,13,20,evening?'#a78289':'#bd9180');r(17,116,17,4,'#c69d8e');r(25,96,2,20,'#83977d');poly([[26,103],[17,97],[18,93],[24,96]],'#a2b18d');poly([[27,110],[35,101],[37,102],[33,109]],'#8a9f7e');
 }
 // Одинаковые черты героев сохраняются во всех сценах.
+function breakfastAction(time){const cycle=((time%10000)+10000)%10000;const kind=cycle<5000?'food':'coffee';const phase=cycle%5000;return {kind,lift:phase<1200?phase/1200:phase<2400?1:phase<3600?1-(phase-2400)/1200:0};}
+function bowlWiggle(time){const phase=((time%7000)+7000)%7000;return phase<1600?Math.round(Math.sin(phase/1600*Math.PI*4)*2):0;}
 function drawSeatedPerson(x,y,male=false,breakfast=false,time=0){const {c,r,poly}=painter(document.getElementById('scene'));c.save();c.translate(x,y);
-const hair=male?'#5a3a22':'#3b2a4a',skin='#edbea7',top=male?'#4a7bd0':'#b79cff',shade=male?'#3561af':'#9273d4';
+const hair=male?'#5a3a22':'#3b2a4a',skin='#edbea7',top=male?'#4a7bd0':breakfast?'#e6dcff':'#f49bbb',shade=male?'#3561af':breakfast?'#b8a5dc':'#ce709b';
 if(!male){poly([[0,0],[14,0],[19,6],[20,31],[17,44],[-4,44],[-5,10]],hair);r(-2,10,3,28,'#66505a');}
 else{r(0,0,16,6,hair);r(-3,4,23,12,hair);r(0,12,17,13,hair);}
 poly([[5,6],[16,6],[18,12],[21,15],[21,18],[18,18],[18,26],[13,30],[6,27],[3,20],[3,12]],skin);r(7,9,8,15,'#f5ceb4');r(16,14,2,2,'#3b2a4a');r(15,22,3,1,'#bf8e86');r(7,27,8,8,skin);r(3,4,14,6,hair);if(!male)r(1,9,5,16,hair);
 if(male){poly([[1,34],[16,34],[22,42],[24,61],[21,73],[-5,73],[-6,44]],top);r(-4,42,4,27,shade);r(-3,72,28,7,'#3a4a7a');r(14,78,10,13,'#3a4a7a');r(18,89,14,4,'#514957');}
-else{poly([[1,34],[15,34],[21,40],[24,44],[29,46],[32,51],[33,60],[30,67],[25,70],[30,75],[30,81],[-4,81],[-6,75],[-4,43]],top);r(-4,44,4,28,shade);r(24,48,4,7,'#b9a3c8');r(5,81,8,9,skin);r(23,81,7,9,skin);r(3,89,13,4,'#514957');r(21,89,14,4,'#514957');}
-if(breakfast){const lift=Math.floor(time/1800)%2===0;poly([[5,39],[10,39],[13,48],[19,51],[28,50],[29,54],[18,57],[9,53],[5,46]],skin);r(26,lift?45:49,6,6,'#f6ead8');r(32,lift?46:50,2,3,'#d4b5aa');}
+else{poly([[1,34],[15,34],[21,40],[24,44],[29,46],[32,51],[33,60],[30,67],[25,70],[30,75],[30,81],[-4,81],[-6,75],[-4,43]],top);r(-4,44,4,28,shade);r(24,48,4,7,breakfast?'#f5efff':'#ffd0e0');if(breakfast){r(0,35,17,2,'#fff5f5');r(2,37,12,2,'#fff5f5');r(2,78,27,3,'#fff5f5');for(const [dx,dy]of [[5,47],[15,55],[7,66],[23,69]]){r(dx,dy,2,2,'#fff9f4');}r(7,38,3,3,'#efadc6');}r(5,81,8,9,skin);r(23,81,7,9,skin);r(3,89,13,4,'#514957');r(21,89,14,4,'#514957');}
+if(breakfast){const action=breakfastAction(time);const handX=action.kind==='coffee'?Math.round(30-12*action.lift):Math.round(32-12*action.lift),handY=Math.round(51-32*action.lift);poly([[5,39],[10,39],[12,47],[handX-3,handY],[handX+2,handY],[handX+2,handY+4],[handX-4,handY+5],[9,53],[5,46]],skin);
+if(action.kind==='coffee'){r(handX-2,handY-5,7,7,'#fff5e7');r(handX-1,handY-5,5,1,'#805c4c');r(handX+5,handY-3,2,4,'#d4b5aa');r(handX+5,handY-2,1,2,'#fff5e7');}else{r(handX,handY-2,8,1,'#a7a6b4');r(handX+6,handY-3,3,2,'#ded9d5');r(handX+6,handY-3,2,1,'#e5bc81');}}
+
 else{poly([[4,40],[9,40],[12,54],[19,58],[27,56],[29,59],[19,63],[8,59],[4,50]],skin);}
 c.restore();}
 function drawBreakfast(time){drawRoom(false);const {r,poly}=painter(document.getElementById('scene'));
 // Два стула и совместный завтрак у окна.
 for(const x of [74,119]){r(x,91,27,37,'#b99b91');r(x+2,93,23,31,'#d6b7a5');r(x,127,29,4,'#ac8b83');r(x+3,131,3,17,'#a3857c');r(x+23,131,3,17,'#a3857c');}
-drawSeatedPerson(83,51,false,true,time);drawSeatedPerson(128,51,true,true,time+1800);
+drawSeatedPerson(83,51,false,true,time);drawSeatedPerson(128,51,true,true,time+2600);
 r(110,109,83,5,'#a6867f');r(113,105,78,4,'#e7ccb0');r(115,114,4,36,'#9b7b75');r(183,114,4,36,'#9b7b75');
 // Тарелки, тосты, каша, фрукты и чашки.
-r(117,103,18,2,'#fff4e5');r(120,99,11,4,'#c79b69');r(122,100,7,2,'#e9c188');r(153,103,18,2,'#fff4e5');r(156,99,12,4,'#d6b99b');r(157,98,10,2,'#f0dfb6');r(143,96,6,8,'#b6bfa4');r(149,98,3,4,'#b6bfa4');r(178,95,6,8,'#ddaaa5');r(184,97,2,4,'#ddaaa5');r(139,104,5,1,'#9b8390');r(174,103,6,2,'#c88781');r(177,101,1,2,'#8d9c71');
-// Пёс сидит возле стола, поднимает лапку и поглядывает на завтрак.
-const dogCanvas=document.getElementById('scene').getContext('2d');dogCanvas.save();dogCanvas.translate(0,-dogReaction().jump);const bounce=Math.floor(time/650)%2;const x=202,y=148;const white='#fffaf2';
+r(117,103,18,2,'#fff4e5');r(120,99,11,4,'#c79b69');r(122,100,7,2,'#e9c188');r(153,103,18,2,'#fff4e5');r(156,99,12,4,'#d6b99b');r(157,98,10,2,'#f0dfb6');if(breakfastAction(time).kind!=='coffee'){r(111,98,7,6,'#fff5e7');r(118,99,2,3,'#d4b5aa');}if(breakfastAction(time+2600).kind!=='coffee'){r(158,97,7,6,'#fff5e7');r(165,98,2,3,'#d4b5aa');}r(139,104,5,1,'#9b8390');r(174,103,6,2,'#c88781');r(177,101,1,2,'#8d9c71');
+// Миска с водой остаётся на полу; пустая миска — в зубах пса.
+poly([[219,149],[235,149],[233,156],[221,156]],'#8ba9be');r(220,148,14,3,'#dcecf5');r(222,149,10,1,'#80cbe4');r(224+Math.floor(time/800)%2,149,3,1,'#e2f7ff');
+// Пёс периодически шевелит головой вместе с миской.
+
+const dogCanvas=document.getElementById('scene').getContext('2d');dogCanvas.save();dogCanvas.translate(0,-dogReaction().jump);const bounce=bowlWiggle(time);const x=202,y=148;const white='#fffaf2';
 poly([[x-8,y-16],[x+1,y-17],[x+8,y-8],[x+9,y],[x-11,y],[x-12,y-5]],'#a59a9a');r(x-8,y-14,10,12,white);r(x-10,y-4,18,3,white);r(x+5,y-8,4,4,'#ac7856');r(x+9,y-13-bounce,2,11,white);r(x+10,y-17-bounce,2,6,white);
 r(x-12,y-26-bounce,12,12,'#a59a9a');r(x-11,y-25-bounce,10,10,white);r(x-15,y-22-bounce,6,5,white);r(x-15,y-22-bounce,2,2,'#554c54');r(x-9,y-23-bounce,1,1,'#554c54');poly([[x-2,y-25-bounce],[x+1,y-23-bounce],[x-1,y-18-bounce],[x-4,y-21-bounce]],'#e4ddd8');r(x-12,y-11-bounce,5,3,white);r(x-15,y-13-bounce,4,3,white);
+const bowlX=x-24,bowlY=y-20-bounce;
+poly([[bowlX,bowlY],[bowlX+13,bowlY],[bowlX+11,bowlY+7],[bowlX+3,bowlY+7]],'#cf9b9e');r(bowlX,bowlY,13,2,'#ffe4df');r(bowlX+2,bowlY,9,1,'#ae848e');r(bowlX+4,bowlY+4,5,1,'#ebc3c2');
 // Маленькое сердечко вместо просьбы словами.
+
 poly([[206,108],[208,108],[209,110],[211,108],[213,108],[213,112],[209,116],[206,113]],'#c08a98');dogCanvas.restore();
 }
 function drawEvening(time){drawRoom(true);const {r,poly}=painter(document.getElementById('scene'));
@@ -188,7 +198,7 @@ let activeScene='';
 function drawScene(time=0,mode=selectedScene()){lastSceneTime=time;if(mode==='morning')drawBreakfast(time);else if(mode==='evening')drawEvening(time);else drawDayScene(time);
 const reaction=dogReaction();const dog=mode==='day'?dogPose(time):mode==='morning'?{x:202,y:148-reaction.jump}:{x:195,y:153-reaction.jump};const target=document.getElementById('dogTarget'),bark=document.getElementById('bark');Object.assign(target.style,{left:((dog.x-22)/240*100)+'%',top:((dog.y-29)/168*100)+'%',width:'19%',height:'17%'});Object.assign(bark.style,{left:(dog.x/240*100)+'%',top:((dog.y-32)/168*100)+'%'});bark.hidden=!reaction.active;bark.textContent=reaction.active?'Гав-гав!':'';
 drawInteractionEffects();
-if(mode!==activeScene){activeScene=mode;const belly=document.getElementById('belly');const descriptions={morning:'Утро: темноволосая беременная девушка и мужчина с коричневыми волосами завтракают вместе; белый джек-рассел с коричневым пятном у основания хвоста выпрашивает еду',day:'День: беременная девушка стоит у окна, белый джек-рассел с коричневым пятном у основания хвоста бегает вокруг неё',evening:'Вечер: девушка и мужчина с коричневыми волосами вместе смотрят телевизор на диване; белый пёс спит рядом на лежанке'};document.getElementById('scene').setAttribute('aria-label',descriptions[mode]);document.getElementById('sceneLabel').textContent={morning:'Доброе утро. Завтракаем вместе',day:'С каждым днём ближе к нашей встрече',evening:'Тихий вечер. Вся семья рядом'}[mode];Object.assign(belly.style,mode==='day'?{left:'47%',top:'48%',width:'18%',height:'21%'}:mode==='morning'?{left:'39%',top:'54%',width:'11%',height:'13%'}:{left:'40%',top:'54%',width:'11%',height:'15%'});}}
+if(mode!==activeScene){activeScene=mode;const belly=document.getElementById('belly');const descriptions={morning:'Утро: девушка в сиреневой ночнушке и мужчина завтракают, едят и пьют кофе; белый джек-рассел держит пустую миску в зубах, рядом на полу миска с водой',day:'День: беременная девушка в розовом платье стоит у окна, белый джек-рассел с коричневым пятном у основания хвоста бегает вокруг неё',evening:'Вечер: девушка в розовом платье и мужчина с коричневыми волосами вместе смотрят телевизор на диване; белый пёс спит рядом на лежанке'};document.getElementById('scene').setAttribute('aria-label',descriptions[mode]);document.getElementById('sceneLabel').textContent={morning:'Доброе утро. Завтракаем вместе',day:'С каждым днём ближе к нашей встрече',evening:'Тихий вечер. Вся семья рядом'}[mode];Object.assign(belly.style,mode==='day'?{left:'47%',top:'48%',width:'18%',height:'21%'}:mode==='morning'?{left:'39%',top:'54%',width:'11%',height:'13%'}:{left:'40%',top:'54%',width:'11%',height:'15%'});}}
 // Перерисовка 12 раз в секунду сохраняет покадровый характер пиксель-арта.
 function startDogAnimation(){if(typeof requestAnimationFrame!=='function')return;const motion=window.matchMedia('(prefers-reduced-motion: reduce)');let last=0;function tick(time){if(!document.hidden&&(((!motion.matches||dogReaction().active||!document.getElementById('bark').hidden||Date.now()-interaction.at<2400)&&time-last>=80)||activeScene!==selectedScene())){drawScene(motion.matches?0:time);last=time;}requestAnimationFrame(tick);}motion.addEventListener('change',()=>drawScene());requestAnimationFrame(tick);}
 function drawFruit(item){const {c,r,poly}=painter(document.getElementById('fruit'));c.clearRect(0,0,40,40);const [,type,col]=item;const edge='#78616a';r(10,35,22,2,'#e8d9d4');
