@@ -106,10 +106,14 @@ poly([[-10,-19],[-7,-17],[-9,-12],[-12,-15]],shadow);r(-10,-17,2,2,white);
 // Бег: поочерёдно вытянутые передняя и задняя лапы.
 if(pose.step%2===0){r(-12,-4,3,4,white);r(-14,-1,4,1,white);r(6,-4,3,3,white);r(8,-2,4,2,white);}else{r(-9,-4,3,4,white);r(-9,-1,5,1,white);r(8,-4,3,3,white);r(5,-1,5,1,white);}
 c.restore();}
+function atmospherePose(time){return {cloud:Math.floor(time/950)%90,leaf:Math.round(Math.sin(time/2400)),twinkle:.35+.65*(.5+.5*Math.sin(time/1900))};}
+function drawWindowAtmosphere(time,evening=false,day=false){const {c,r}=painter(document.getElementById('scene'));const width=day?51:47,top=day?26:27,height=day?63:57;const pose=atmospherePose(time);c.save();c.beginPath();c.rect(24,top,width,height);c.clip();r(24,top,width,height,evening?'#444d79':'#8fd3ff');if(!evening){r(24,66,width,23,'#cdefff');const sx=day?50:31,sy=day?34:39;r(sx,sy,11,11,'#ffe36b');r(sx-2,sy+3,15,5,'#ffe36b');}else{r(52,34,10,10,'#eddfb1');r(56,32,8,10,'#444d79');for(let i=0;i<5;i++){const [x,y]=[[30,34],[42,49],[63,63],[31,70],[67,39]][i];c.globalAlpha=.3+.7*(.5+.5*Math.sin(time/1800+i*1.8));r(x,y,1,3,'#f8e8bf');r(x-1,y+1,3,1,'#f8e8bf');}c.globalAlpha=1;}
+for(let i=0;i<2;i++){const x=14+((pose.cloud+i*44)%90)-22,y=evening?53+i*17:46+i*14;c.globalAlpha=evening?.2:.85;r(x,y+3,23,4,evening?'#b9bdd9':'#fffdf4');r(x+4,y,13,4,evening?'#b9bdd9':'#fffdf4');r(x+9,y-2,6,3,evening?'#b9bdd9':'#fffdf4');}c.restore();}
+function drawPlantLeaves(time,day=false){const {r,poly}=painter(document.getElementById('scene'));const offset=atmospherePose(time).leaf;if(day){r(32,94,2,24,'#788d74');poly([[33,104],[23+offset,99],[21+offset,94],[29+offset,94],[34,100]],'#9bae8b');poly([[34,111],[43+offset,104],[44+offset,99],[37+offset,101],[33,107]],'#829a7e');poly([[33,98],[28+offset,89],[29+offset,84],[34+offset,89],[35,98]],'#9bae8b');}else{r(25,96,2,20,'#83977d');poly([[26,103],[17+offset,97],[18+offset,93],[24+offset,96]],'#a2b18d');poly([[27,110],[35+offset,101],[37+offset,102],[33+offset,109]],'#8a9f7e');}}
 function drawDayScene(time=0){const {c,r,poly}=painter(document.getElementById('scene'));const dog=dogPose(time);
 r(0,0,240,168,'#fff0dc');r(0,0,240,11,'#e2cfcf');for(let x=8;x<240;x+=16){r(x,17,1,111,'#e8d4d2');r(x+3,31,2,2,'#e0c9cc');r(x+3,71,2,2,'#e0c9cc');}
 // Окно, небо и ступенчатые облака.
-r(18,20,63,76,'#a18b9f');r(21,23,57,69,'#fdf6e6');r(24,26,51,63,'#8fd3ff');r(24,68,51,21,'#cdefff');r(50,34,13,13,'#ffe36b');r(48,37,17,7,'#ffe36b');r(25,47,18,5,'#edf0e7');r(29,44,10,4,'#edf0e7');r(55,60,20,4,'#edf0e7');r(60,57,11,3,'#edf0e7');r(47,24,3,67,'#fff4df');r(23,57,53,3,'#fff4df');r(15,92,69,5,'#a18b9f');r(18,97,63,3,'#dac4bc');
+r(18,20,63,76,'#a18b9f');r(21,23,57,69,'#fdf6e6');r(24,26,51,63,'#8fd3ff');r(24,68,51,21,'#cdefff');r(50,34,13,13,'#ffe36b');r(48,37,17,7,'#ffe36b');r(25,47,18,5,'#edf0e7');r(29,44,10,4,'#edf0e7');r(55,60,20,4,'#edf0e7');r(60,57,11,3,'#edf0e7');drawWindowAtmosphere(time,false,true);r(47,24,3,67,'#fff4df');r(23,57,53,3,'#fff4df');r(15,92,69,5,'#a18b9f');r(18,97,63,3,'#dac4bc');
 r(13,18,7,69,'#b6a1bd');r(13,18,12,8,'#c9b8cc');r(20,26,5,15,'#c9b8cc');r(77,18,10,9,'#c9b8cc');r(81,27,6,60,'#b6a1bd');
 // Пол и ковёр.
 r(0,128,240,4,'#c2a6a3');r(0,132,240,36,'#d5b59f');for(let y=138;y<168;y+=12){r(0,y,240,1,'#bb9990');for(let x=(y%24?15:0);x<240;x+=42)r(x,y+1,1,11,'#c4a18f');}r(53,151,126,12,'#ffb1c9');r(48,154,136,6,'#ffb1c9');r(58,154,116,5,'#ffd3e1');
@@ -118,25 +122,25 @@ r(172,49,48,4,'#a58b86');r(178,53,3,5,'#b69b94');r(213,53,3,5,'#b69b94');r(177,3
 // Кресло и плед.
 r(175,107,43,34,'#b79cff');r(171,113,7,25,'#9879d2');r(217,113,7,25,'#9879d2');r(179,105,35,4,'#b79cff');r(179,113,35,17,'#d5c4ff');r(178,137,39,6,'#967d9d');r(180,143,4,7,'#967c77');r(211,143,4,7,'#967c77');r(199,115,13,29,'#ffd7a9');for(let y=118;y<145;y+=5)r(199,y,13,1,'#c99f97');
 // Растение у окна.
-r(25,121,17,19,'#b6877d');r(23,118,21,5,'#cba095');r(32,94,2,24,'#788d74');poly([[33,104],[23,99],[21,94],[29,94],[34,100]],'#9bae8b');poly([[34,111],[43,104],[44,99],[37,101],[33,107]],'#829a7e');poly([[33,98],[28,89],[29,84],[34,89],[35,98]],'#9bae8b');
+r(25,121,17,19,'#b6877d');r(23,118,21,5,'#cba095');drawPlantLeaves(time,true);
 // Темноволосая девушка: все координаты на пиксельной сетке.
 if(dog.behind)drawDog(dog);
 drawChibiPerson(94,58,false,false,false,time);
 if(!dog.behind)drawDog(dog);
 }
 function sceneForHour(hour){return hour>=6&&hour<12?'morning':hour>=12&&hour<18?'day':'evening';}
-function drawRoom(evening){const {r,poly}=painter(document.getElementById('scene'));
+function drawRoom(evening,time=0){const {r,poly}=painter(document.getElementById('scene'));
 r(0,0,240,168,evening?'#776f91':'#fff0dc');r(0,0,240,10,evening?'#685e82':'#e7cdb9');
 for(let x=8;x<240;x+=16){r(x,17,1,110,evening?'#817799':'#ead5c2');r(x+4,30,2,2,evening?'#9283a3':'#dfc5be');}
 r(18,21,59,69,'#9b879c');r(21,24,53,63,'#f9ead4');r(24,27,47,57,evening?'#444d79':'#8fd3ff');
 if(evening){r(52,34,10,10,'#eddfb1');r(56,32,8,10,'#444d79');for(const [x,y]of [[30,34],[42,49],[63,63],[31,70]]){r(x,y,1,3,'#e4d3bc');r(x-1,y+1,3,1,'#e4d3bc');}}
 else{r(31,39,11,11,'#ffe36b');r(29,42,15,5,'#ffe36b');r(48,58,21,4,'#f5f2e7');r(54,55,10,3,'#f5f2e7');}
-r(46,24,3,63,'#f9ead4');r(21,55,53,3,'#f9ead4');r(15,87,65,4,'#9b879c');r(13,19,8,62,evening?'#9c88ab':'#c6b0c7');r(74,19,8,62,evening?'#9c88ab':'#c6b0c7');
+drawWindowAtmosphere(time,evening);r(46,24,3,63,'#f9ead4');r(21,55,53,3,'#f9ead4');r(15,87,65,4,'#9b879c');r(13,19,8,62,evening?'#9c88ab':'#c6b0c7');r(74,19,8,62,evening?'#9c88ab':'#c6b0c7');
 r(0,128,240,4,evening?'#89758b':'#c4a4a0');r(0,132,240,36,evening?'#a88d94':'#d8b9a0');for(let y=139;y<168;y+=12){r(0,y,240,1,evening?'#907987':'#c3a08d');for(let x=14;x<240;x+=43)r(x,y+1,1,11,evening?'#9a8190':'#c9a690');}
 r(35,151,171,11,evening?'#9c7e9e':'#ffb1c9');r(30,154,181,5,evening?'#9c7e9e':'#ffb1c9');r(40,154,161,4,evening?'#b599b1':'#ffd3e1');
 r(183,47,39,4,evening?'#a78b9a':'#b49888');r(188,34,5,13,'#a5ae94');r(194,32,5,15,'#c69ba5');r(201,36,4,11,'#e0c088');r(211,34,8,13,'#eadbc2');r(213,38,4,4,'#b17c90');
 // Растение на полу.
-r(19,118,13,20,evening?'#a78289':'#bd9180');r(17,116,17,4,'#c69d8e');r(25,96,2,20,'#83977d');poly([[26,103],[17,97],[18,93],[24,96]],'#a2b18d');poly([[27,110],[35,101],[37,102],[33,109]],'#8a9f7e');
+r(19,118,13,20,evening?'#a78289':'#bd9180');r(17,116,17,4,'#c69d8e');drawPlantLeaves(time);
 }
 // Одинаковые черты героев сохраняются во всех сценах.
 function breakfastAction(time){const phase=((time%7000)+7000)%7000;return {kind:'food',lift:phase<1200?phase/1200:phase<2100?1:phase<3300?1-(phase-2100)/1200:0};}
@@ -166,7 +170,7 @@ if(night){const {lift}=breakfastAction(time);const handX=x+32,handY=y+35-Math.ro
 function drawSeatedPerson(x,y,male=false,breakfast=false,time=0){drawChibiPerson(x,y+16,male,breakfast,true,time);}
 function steamPose(time){const phase=((time%2600)+2600)%2600;return {rise:Math.floor(phase/400),sway:Math.floor(phase/650)%2,alpha:1-phase/2600};}
 function drawCoffeeCup(x,y,time){const {c,r}=painter(document.getElementById('scene'));r(x,y,7,7,'#fff5e7');r(x+1,y,5,1,'#805c4c');r(x+7,y+2,2,4,'#d4b5aa');r(x+7,y+3,1,2,'#fff5e7');for(let i=0;i<2;i++){const p=steamPose(time+i*950);c.save();c.globalAlpha=p.alpha*.55;r(x+2+i*3+p.sway,y-3-p.rise,1,3,'#fffdf6');r(x+3+i*3-p.sway,y-5-p.rise,1,2,'#fffdf6');c.restore();}}
-function drawBreakfast(time){drawRoom(false);const {r,poly}=painter(document.getElementById('scene'));
+function drawBreakfast(time){drawRoom(false,time);const {r,poly}=painter(document.getElementById('scene'));
 // Два стула и совместный завтрак у окна.
 for(const x of [74,119]){r(x,91,27,37,'#b99b91');r(x+2,93,23,31,'#d6b7a5');r(x,127,29,4,'#ac8b83');r(x+3,131,3,17,'#a3857c');r(x+23,131,3,17,'#a3857c');}
 drawSeatedPerson(83,51,false,true,time);drawSeatedPerson(128,51,true,true,time+2600);
@@ -187,7 +191,7 @@ poly([[bowlX,bowlY],[bowlX+13,bowlY],[bowlX+11,bowlY+7],[bowlX+3,bowlY+7]],'#cf9
 poly([[206,108],[208,108],[209,110],[211,108],[213,108],[213,112],[209,116],[206,113]],'#c08a98');dogCanvas.restore();
 }
 function eveningAction(time){const dogPhase=((time%15000)+15000)%15000;return {channel:Math.floor(time/7000)%4,awake:dogPhase>=9500&&dogPhase<13000,lift:dogPhase<9500||dogPhase>=13000?0:dogPhase<10200?(dogPhase-9500)/700:dogPhase<12300?1:1-(dogPhase-12300)/700,look:dogPhase<11200?-1:1};}
-function drawEvening(time){drawRoom(true);const {r,poly}=painter(document.getElementById('scene'));
+function drawEvening(time){drawRoom(true,time);const {r,poly}=painter(document.getElementById('scene'));
 // Широкий диван для двоих.
 r(72,85,92,47,'#9674d1');r(78,80,80,9,'#b79cff');r(78,89,36,32,'#cdb5ff');r(117,89,40,32,'#cdb5ff');r(69,109,9,29,'#9270c9');r(158,109,10,29,'#9270c9');r(76,130,85,9,'#7958ad');r(81,139,4,9,'#65596f');r(151,139,4,9,'#65596f');
 drawSeatedPerson(86,48,false,false,time);drawSeatedPerson(128,48,true,false,time);
